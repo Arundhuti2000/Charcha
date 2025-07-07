@@ -49,15 +49,16 @@ def get_posts(db: Session = Depends(get_db)):
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_posts(post: Post,db: Session = Depends(get_db)):
-    new_post=models.Post(title=post.title, content=post.content, published=post.published, category=post.category, rating=post.rating)
-    # cursor.execute("""INSERT INTO POSTS (title, content, published, category, rating) VALUES (%s,%s, %s, %s, %s) RETURNING *""", (post.title,post.content, post.published, post.category, post.rating))
-    # new_post= cursor.fetchone()
-    # conn.commit()
-    # return {"message": "Succesfully created a post", "title": new_post['title'], "id": new_post['id']}
+    new_post=models.Post(**post.dict()) #unpacking the post dict to match the Post model
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
     return {"message":  new_post}
+    # cursor.execute("""INSERT INTO POSTS (title, content, published, category, rating) VALUES (%s,%s, %s, %s, %s) RETURNING *""", (post.title,post.content, post.published, post.category, post.rating))
+    # new_post= cursor.fetchone()
+    # conn.commit()
+    # return {"message": "Succesfully created a post", "title": new_post['title'], "id": new_post['id']}
+    
 
 @app.get("/posts/latest")
 def get_latest_post():
