@@ -16,6 +16,6 @@ class User(Base):
 
     id=Column(Integer, primary_key=True, nullable=False)
     email=Column(String(100), nullable=False, unique=True)
-    password=Column(String(15),nullable=False)
+    password=Column(String(100),nullable=False)
     created_at=Column(TIMESTAMP(timezone=True), server_default='now()',nullable=False)
     phone_number=Column(String(15), nullable=True)
