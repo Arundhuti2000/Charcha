@@ -60,12 +60,12 @@ def create_posts(post: schemas.CreatePost,db: Session = Depends(get_db)):
     # return {"message": "Succesfully created a post", "title": new_post['title'], "id": new_post['id']}
     
 
-@app.get("/posts/latest")
-def get_latest_post():
-    if len(my_post) == 0:
-        return {"error": "No posts available"}
-    latest_post = my_post[-1]
-    return {"latest_post": latest_post}
+# @app.get("/posts/latest")
+# def get_latest_post():
+#     if len(my_post) == 0:
+#         return {"error": "No posts available"}
+#     latest_post = my_post[-1]
+#     return {"latest_post": latest_post}
 
 @app.get("/posts/{id}", response_model=schemas.PostResponse)
 def get_post(id:int, db: Session = Depends(get_db)):
@@ -109,4 +109,3 @@ def update_post(id: int, updated_post: schemas.UpdatePost, db: Session = Depends
 
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
 def create_user():
-    
