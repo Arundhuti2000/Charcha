@@ -107,5 +107,10 @@ def update_post(id: int, updated_post: schemas.UpdatePost, db: Session = Depends
     # conn.commit()
 
 
-@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
-def create_user():
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
+def create_user(user: schemas.CreateUser,db: Session = Depends(get_db)):
+    new_user=models.User(**user.dict()) #unpacking the post dict to match the Post model
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
