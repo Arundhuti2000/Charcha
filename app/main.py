@@ -7,7 +7,7 @@ from psycopg2.extras import RealDictCursor
 from . import models, schemas, utils
 from sqlalchemy .orm import Session 
 from .database import engine, get_db
-from .routes import post, user
+from .routes import post, user, auth
 
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -30,6 +30,7 @@ while True:
 
 app.include_router(post.router)
 app.include_router(user.router) # go into user file and import all the router types
+app.include_router(auth.router)
 
 @app.get("/")
 def read_root():
