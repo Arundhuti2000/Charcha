@@ -1,5 +1,5 @@
 from .database import Base
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey
 class Post(Base):
     __tablename__ = 'posts'
 
@@ -10,6 +10,7 @@ class Post(Base):
     rating= Column(Integer,nullable=False)
     created_at=Column(TIMESTAMP(timezone=True), server_default='now()',nullable=False)
     category=Column(String(50), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable= False)
 
 class User(Base):
     __tablename__ = 'users'

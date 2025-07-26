@@ -8,6 +8,7 @@ class PostBase(BaseModel):
     category: str
     published: bool = True
     rating: Optional[int] = None
+    
 
 class CreatePost(PostBase):
     pass
@@ -18,6 +19,7 @@ class UpdatePost(PostBase):
 class PostResponse(PostBase):
     id: int
     created_at: datetime
+    user_id: int
     class Config:
         orm_mode = True
 
