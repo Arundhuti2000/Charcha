@@ -22,3 +22,9 @@ class User(Base):
     password=Column(String(100),nullable=False)
     created_at=Column(TIMESTAMP(timezone=True), server_default='now()',nullable=False)
     phone_number=Column(String(15), nullable=True)
+
+class Votes(Base):
+    __tablename__ = 'votes'
+    post_id=Column(Integer, ForeignKey("posts.id", ondelete="CASCADE") ,primary_key=True, nullable=False)
+    user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, nullable=False)
+    dir = Column(Integer, nullable=False)
