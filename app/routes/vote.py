@@ -36,3 +36,4 @@ def vote(vote: schemas.Vote, db: Session = Depends(get_db), get_current_user: in
         db.commit()
         return {"message":"Successfully deleted your vote"}
         
+#select posts.*, count(votes.post_id) as votes from posts left join votes on posts.id=votes.post_id group by posts.id

@@ -1,7 +1,8 @@
 from .. import models, schemas, oauth2
 from fastapi import FastAPI, HTTPException, Response, status, Depends, APIRouter
-from sqlalchemy .orm import Session 
+from sqlalchemy.orm import Session 
 from ..database import get_db
+from sqlalchemy import func
 from typing import List, Optional
 
 router = APIRouter(
@@ -9,12 +10,14 @@ router = APIRouter(
     tags=["Posts"]
 )
 
-@router.get("/", response_model=List[schemas.PostResponse])
+# @router.get("/", response_model=List[schemas.PostResponse])
+@router.get("/")
 def get_all_posts(db: Session = Depends(get_db),get_current_user:int = Depends(oauth2.get_current_user), limit: int = 10, skip: int=0, search: Optional[str]= ""):
     posts=db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    results = db.query(models.Post, func.count(models.Votes.post_id).label("Votes")).join(models.Votes, models.Votes.post_id == models.Post.id, isouter=True).group_by(models.Post.id).all()
     print(limit)
-    print(posts)
-    return posts
+    print(type(results))
+    return results
     # cursor.execute("""SELECT * FROM posts""")
     # posts=cursor.fetchall()
 @router.get("/profileposts", response_model=List[schemas.PostResponse])
@@ -25,20 +28,6 @@ def get_own_posts(db: Session = Depends(get_db),get_current_user:int = Depends(o
     return posts
     # cursor.execute("""SELECT * FROM posts""")
     # posts=cursor.fetchall()
-
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
-def create_posts(post: schemas.CreatePost,db: Session = Depends(get_db), get_current_user:int = Depends(oauth2.get_current_user)):
-    print(get_current_user.id)
-    new_post=models.Post(user_id=get_current_user.id, **post.dict()) #unpacking the post dict to match the Post model
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
-    return new_post
-    # cursor.execute("""INSERT INTO POSTS (title, content, published, category, rating) VALUES (%s,%s, %s, %s, %s) RETURNING *""", (post.title,post.content, post.published, post.category, post.rating))
-    # new_post= cursor.fetchone()
-    # conn.commit()
-    # return {"message": "Succesfully created a post", "title": new_post['title'], "id": new_post['id']}
-
 
 @router.get("/{id}", response_model=schemas.PostResponse)
 def get_post(id:int, db: Session = Depends(get_db), get_current_user:int = Depends(oauth2.get_current_user)):
@@ -56,7 +45,21 @@ def get_post(id:int, db: Session = Depends(get_db), get_current_user:int = Depen
     # post = cursor.fetchone()
     # print(post)
     # # post=find_post(id)
-    
+
+
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
+def create_posts(post: schemas.CreatePost,db: Session = Depends(get_db), get_current_user:int = Depends(oauth2.get_current_user)):
+    print(get_current_user.id)
+    new_post=models.Post(user_id=get_current_user.id, **post.dict()) #unpacking the post dict to match the Post model
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return new_post
+    # cursor.execute("""INSERT INTO POSTS (title, content, published, category, rating) VALUES (%s,%s, %s, %s, %s) RETURNING *""", (post.title,post.content, post.published, post.category, post.rating))
+    # new_post= cursor.fetchone()
+    # conn.commit()
+    # return {"message": "Succesfully created a post", "title": new_post['title'], "id": new_post['id']}
+
 
 @router.delete("/{id}")
 def delete_post(id:int, db: Session = Depends(get_db),  get_current_user:int = Depends(oauth2.get_current_user)):
