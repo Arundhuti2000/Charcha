@@ -2,7 +2,7 @@ from .. import models, schemas, oauth2
 from fastapi import FastAPI, HTTPException, Response, status, Depends, APIRouter
 from sqlalchemy .orm import Session 
 from ..database import get_db
-from typing import List
+from typing import List, Optional
 
 router = APIRouter(
     prefix="/posts",
@@ -10,13 +10,21 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.PostResponse])
-def get_posts(db: Session = Depends(get_db),get_current_user:int = Depends(oauth2.get_current_user)):
-    posts=db.query(models.Post).all()
+def get_all_posts(db: Session = Depends(get_db),get_current_user:int = Depends(oauth2.get_current_user), limit: int = 10, skip: int=0, search: Optional[str]= ""):
+    posts=db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    print(limit)
     print(posts)
     return posts
     # cursor.execute("""SELECT * FROM posts""")
     # posts=cursor.fetchall()
-
+@router.get("/profileposts", response_model=List[schemas.PostResponse])
+def get_own_posts(db: Session = Depends(get_db),get_current_user:int = Depends(oauth2.get_current_user), limit: int = 10, skip: int=0, search: Optional[str]= ""):
+    posts=db.query(models.Post).filter(models.Post.user_id== get_current_user.id).limit(limit).offset(skip).all()
+    print(limit)
+    print(posts)
+    return posts
+    # cursor.execute("""SELECT * FROM posts""")
+    # posts=cursor.fetchall()
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
 def create_posts(post: schemas.CreatePost,db: Session = Depends(get_db), get_current_user:int = Depends(oauth2.get_current_user)):
