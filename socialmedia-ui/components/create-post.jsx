@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,18 +11,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 
-interface CreatePostProps {
-  token: string
-  onPostCreated: () => void
-}
-
-export function CreatePost({ token, onPostCreated }: CreatePostProps) {
+export function CreatePost({ token, onPostCreated }) {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    category: "Technology", // Updated default value to be a non-empty string
+    category: "Technology",
     published: true,
-    rating: null as number | null,
+    rating: null,
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -43,7 +36,7 @@ export function CreatePost({ token, onPostCreated }: CreatePostProps) {
     "Other",
   ]
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
@@ -67,7 +60,7 @@ export function CreatePost({ token, onPostCreated }: CreatePostProps) {
       setFormData({
         title: "",
         content: "",
-        category: "Technology", // Updated default value to be a non-empty string
+        category: "Technology",
         published: true,
         rating: null,
       })
@@ -135,7 +128,7 @@ export function CreatePost({ token, onPostCreated }: CreatePostProps) {
             <div className="space-y-2">
               <Label htmlFor="rating">Rating (1-5)</Label>
               <Select
-                value={formData.rating?.toString() || "0"} // Updated default value to be a non-empty string
+                value={formData.rating?.toString() || "0"}
                 onValueChange={(value) => setFormData({ ...formData, rating: value ? Number.parseInt(value) : null })}
               >
                 <SelectTrigger>

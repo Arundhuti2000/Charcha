@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,23 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 
-interface User {
-  id: number
-  email: string
-  created_at: string
-}
-
-interface LoginFormProps {
-  onLogin: (token: string, user: User) => void
-}
-
-export function LoginForm({ onLogin }: LoginFormProps) {
+export function LoginForm({ onLogin }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [loginData, setLoginData] = useState({ email: "", password: "" })
   const [signupData, setSignupData] = useState({ email: "", password: "" })
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
@@ -68,7 +56,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     }
   }
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")

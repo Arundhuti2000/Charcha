@@ -8,37 +8,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Calendar, Mail } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
-interface User {
-  id: number
-  email: string
-  created_at: string
-}
-
-interface Post {
-  id: number
-  title: string
-  content: string
-  category: string
-  published: boolean
-  rating: number | null
-  created_at: string
-  user_id: number
-  owner: {
-    id: number
-    email: string
-  }
-  Votes: number
-  Upvotes: number
-  Downvotes: number
-}
-
-interface UserProfileProps {
-  token: string
-  user: User
-}
-
-export function UserProfile({ token, user }: UserProfileProps) {
-  const [posts, setPosts] = useState<Post[]>([])
+export function UserProfile({ token, user }) {
+  const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -67,7 +38,7 @@ export function UserProfile({ token, user }: UserProfileProps) {
     }
   }
 
-  const handleVote = async (postId: number, direction: number) => {
+  const handleVote = async (postId, direction) => {
     try {
       const response = await fetch("http://127.0.0.1:8000/vote", {
         method: "POST",
@@ -89,7 +60,7 @@ export function UserProfile({ token, user }: UserProfileProps) {
     }
   }
 
-  const handleDeletePost = async (postId: number) => {
+  const handleDeletePost = async (postId) => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/posts/${postId}`, {
         method: "DELETE",

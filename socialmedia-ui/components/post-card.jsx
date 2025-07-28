@@ -9,33 +9,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ChevronUp, ChevronDown, MoreHorizontal, Trash2, Edit } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
-interface Post {
-  id: number
-  title: string
-  content: string
-  category: string
-  published: boolean
-  rating: number | null
-  created_at: string
-  user_id: number
-  owner: {
-    id: number
-    email: string
-  }
-  Votes: number
-  Upvotes: number
-  Downvotes: number
-}
-
-interface PostCardProps {
-  post: Post
-  currentUserId: number
-  onVote: (postId: number, direction: number) => void
-  onDelete: (postId: number) => void
-}
-
-export function PostCard({ post, currentUserId, onVote, onDelete }: PostCardProps) {
-  const [userVote, setUserVote] = useState<number | null>(null)
+export function PostCard({ post, currentUserId, onVote, onDelete }) {
+  const [userVote, setUserVote] = useState(null)
   const isOwner = post.owner.id === currentUserId
 
   const handleUpvote = () => {

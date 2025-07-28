@@ -5,34 +5,8 @@ import { PostCard } from "@/components/post-card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 
-interface Post {
-  id: number
-  title: string
-  content: string
-  category: string
-  published: boolean
-  rating: number | null
-  created_at: string
-  user_id: number
-  owner: {
-    id: number
-    email: string
-  }
-}
-
-interface PostWithVote extends Post {
-  Votes: number
-  Upvotes: number
-  Downvotes: number
-}
-
-interface PostFeedProps {
-  token: string
-  currentUserId: number
-}
-
-export function PostFeed({ token, currentUserId }: PostFeedProps) {
-  const [posts, setPosts] = useState<PostWithVote[]>([])
+export function PostFeed({ token, currentUserId }) {
+  const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -61,7 +35,7 @@ export function PostFeed({ token, currentUserId }: PostFeedProps) {
     }
   }
 
-  const handleVote = async (postId: number, direction: number) => {
+  const handleVote = async (postId, direction) => {
     try {
       const response = await fetch("http://127.0.0.1:8000/vote", {
         method: "POST",
@@ -84,7 +58,7 @@ export function PostFeed({ token, currentUserId }: PostFeedProps) {
     }
   }
 
-  const handleDeletePost = async (postId: number) => {
+  const handleDeletePost = async (postId) => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/posts/${postId}`, {
         method: "DELETE",
