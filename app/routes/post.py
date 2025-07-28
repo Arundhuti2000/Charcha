@@ -14,24 +14,26 @@ router = APIRouter(
 # @router.get("/")
 def get_all_posts(db: Session = Depends(get_db),get_current_user:int = Depends(oauth2.get_current_user), limit: int = 10, skip: int=0, search: Optional[str]= ""):
     # posts=db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
-    results = db.query(models.Post, func.count(models.Votes.post_id).label("Votes"),func.count(case((models.Votes.dir == 1, 1))).label("Upvotes"),
-        func.count(case((models.Votes.dir == -1, 1))).label("Downvotes")).join(models.Votes, models.Votes.post_id == models.Post.id, isouter=True).group_by(models.Post.id).all()
-    return results
+    posts = db.query(models.Post, func.count(models.Votes.post_id).label("Votes"),func.count(case((models.Votes.dir == 1, 1))).label("Upvotes"),
+        func.count(case((models.Votes.dir == -1, 1))).label("Downvotes")).join(models.Votes, models.Votes.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    return posts
     # cursor.execute("""SELECT * FROM posts""")
     # posts=cursor.fetchall()
-@router.get("/profileposts", response_model=List[schemas.PostResponse])
+@router.get("/profileposts", response_model=List[schemas.PostwithVote])
 def get_own_posts(db: Session = Depends(get_db),get_current_user:int = Depends(oauth2.get_current_user), limit: int = 10, skip: int=0, search: Optional[str]= ""):
-    posts=db.query(models.Post).filter(models.Post.user_id== get_current_user.id).limit(limit).offset(skip).all()
+    posts=db.query(models.Post,  func.count(models.Votes.post_id).label("Votes"),func.count(case((models.Votes.dir == 1, 1))).label("Upvotes"),
+        func.count(case((models.Votes.dir == -1, 1))).label("Downvotes")).join(models.Votes, models.Votes.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.user_id== get_current_user.id).limit(limit).offset(skip).all()
     print(limit)
     print(posts)
     return posts
     # cursor.execute("""SELECT * FROM posts""")
     # posts=cursor.fetchall()
 
-@router.get("/{id}", response_model=schemas.PostResponse)
+@router.get("/{id}", response_model=schemas.PostwithVote)
 def get_post(id:int, db: Session = Depends(get_db), get_current_user:int = Depends(oauth2.get_current_user)):
     try:
-        post=db.query(models.Post).filter(models.Post.user_id==get_current_user.id).filter(models.Post.id==id).first()
+        post=db.query(models.Post,  func.count(models.Votes.post_id).label("Votes"),func.count(case((models.Votes.dir == 1, 1))).label("Upvotes"),
+        func.count(case((models.Votes.dir == -1, 1))).label("Downvotes")).outerjoin(models.Votes, models.Votes.post_id == models.Post.id).filter(models.Post.id==id).group_by(models.Post.id).first()
     except:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id {id} not found")
     print(post)
