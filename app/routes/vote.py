@@ -16,7 +16,7 @@ def vote(vote: schemas.Vote, db: Session = Depends(get_db), get_current_user: in
     post=db.query(models.Post).filter(models.Post.id==vote.post_id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with {vote.post_id} does not exist")
-    vote_query= db.query(models.Votes).filter(models.Votes.post_id== vote.post_id, models.Votes.user_id == models.Votes.user_id==get_current_user.id)
+    vote_query= db.query(models.Votes).filter(models.Votes.post_id== vote.post_id, models.Votes.user_id ==get_current_user.id)
     found_vote=vote_query.first()
     if(vote.dir == 1 or vote.dir == -1):
         if found_vote:
@@ -37,3 +37,12 @@ def vote(vote: schemas.Vote, db: Session = Depends(get_db), get_current_user: in
         return {"message":"Successfully deleted your vote"}
         
 #select posts.*, count(votes.post_id) as votes from posts left join votes on posts.id=votes.post_id group by posts.id
+
+# SELECT 
+#     posts.*, 
+#     COUNT(votes.post_id) as total_votes,
+#     COUNT(CASE WHEN votes.dir = 1 THEN 1 END) as upvotes,
+#     COUNT(CASE WHEN votes.dir = -1 THEN 1 END) as downvotes
+# FROM posts 
+# LEFT JOIN votes ON posts.id = votes.post_id  
+# GROUP BY posts.id
