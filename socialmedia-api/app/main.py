@@ -5,7 +5,7 @@ from .database import engine
 from .routes import post, user, auth, vote
 from .config import settings
 
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 app.add_middleware(
