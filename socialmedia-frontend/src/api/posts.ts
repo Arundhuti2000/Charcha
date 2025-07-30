@@ -17,7 +17,7 @@ export const postApi = {
     return apiFetch(`/posts/profileposts?limit=${limit}&skip=${skip}`);
   },
 
-  // POST
+  // POST /posts = Create New Post
 
   createPost: async (data: CreatePost): Promise<Post> => {
     return apiFetch("/posts", {

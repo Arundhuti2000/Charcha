@@ -3,6 +3,8 @@ import LoginPage from "./pages/login-page";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { BrowserRouter, Route, Routes } from "react-router";
+import { Dashboard } from "./pages/dashboard";
 function App() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -14,13 +16,16 @@ function App() {
   });
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="SocialApp ">
-        <LoginPage />
-      </div>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
       <Toaster richColors position="bottom-right" />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 

@@ -1,10 +1,10 @@
 import { tokenUtils } from "../utils/tokenUtils";
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export const apiFetch = async (url: string, options?: RequestInit) => {
   const token = tokenUtils.get();
 
-  const response = await fetch(`${API_BASE}${url}`, {
+  const response = await fetch(`${API_BASE}/${url}`, {
     headers: {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer  ${token}` }),
