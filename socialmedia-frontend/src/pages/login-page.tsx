@@ -3,13 +3,28 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router";
 import { Eye, EyeOff, Users, MessageCircle, Heart, Share2 } from "lucide-react";
+import { useIsAuthenticated, useLogin } from "@/api/hooks/useAuth";
+import { toast } from "sonner";
 
 const SocialHubLogin: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const loginMutation = useLogin();
+  const isAuthenticated = useIsAuthenticated();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
+
+  const emailRegex: RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   // Animation state for floating icons
   const [animatedIcons, setAnimatedIcons] = useState([
@@ -39,10 +54,32 @@ const SocialHubLogin: React.FC = () => {
   const handleSubmit = async () => {
     setIsLoading(true);
 
+    if (!emailRegex.test(email)) {
+      toast.error("Email is not in correct format");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length == 0) {
+      toast.error("Password is not provided");
+      setIsLoading(false);
+      return;
+    }
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      console.log("Login attempt:", { email, password });
+      loginMutation.mutate(
+        { email: email, password: password },
+        {
+          onSuccess: (response) => {
+            console.log("login was sucessful!", response);
+          },
+          onError: (error) => {
+            console.error("Login failed:", error);
+          },
+        }
+      );
     }, 2000);
   };
 
@@ -61,15 +98,15 @@ const SocialHubLogin: React.FC = () => {
 
         {/* Animated background pattern */}
         <div className="absolute inset-0">
-          {Array.from({ length: 50 }).map((_, i) => (
+          {Array.from({ length: 60 }).map((_, i) => (
             <div
               key={i}
               className="absolute w-1 h-1 bg-white/10 rounded-full animate-pulse"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 2}s`,
+                animationDelay: "3s",
+                animationDuration: "2s",
               }}
             />
           ))}
