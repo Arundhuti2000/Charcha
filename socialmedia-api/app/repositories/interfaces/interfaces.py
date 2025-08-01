@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
-from ...models import Post, User, Votes
+from ...models import Post, User, Votes, Followers
 
 class IPostRepository(ABC):
     @abstractmethod
@@ -58,4 +58,54 @@ class IVoteRepository(ABC):
     @abstractmethod
     def get_post_vote_counts(self, post_id: int) -> dict:
         """Get vote counts for a post"""
+        pass
+class IFollowerRepository(ABC):
+    @abstractmethod
+    def follow_user(self, follower_id: int, following_id: int) -> Followers:
+        """Create a follow relationship"""
+        pass
+    
+    @abstractmethod
+    def unfollow_user(self, follower_id: int, following_id: int) -> bool:
+        """Remove a follow relationship"""
+        pass
+    
+    @abstractmethod
+    def is_following(self, follower_id: int, following_id: int) -> bool:
+        """Check if user A follows user B"""
+        pass
+    
+    @abstractmethod
+    def get_followers(self, user_id: int, skip: int = 0, limit: int = 100) -> List[User]:
+        """Get list of users who follow this user"""
+        pass
+    
+    @abstractmethod
+    def get_following(self, user_id: int, skip: int = 0, limit: int = 100) -> List[User]:
+        """Get list of users this user is following"""
+        pass
+    
+    @abstractmethod
+    def get_follower_count(self, user_id: int) -> int:
+        """Get total number of followers"""
+        pass
+    
+    @abstractmethod
+    def get_following_count(self, user_id: int) -> int:
+        """Get total number of users being followed"""
+        pass
+    
+    @abstractmethod
+    def get_user_stats(self, user_id: int) -> Dict:
+        """Get follower and following counts for a user"""
+        pass
+    
+    @abstractmethod
+    def get_mutual_follows(self, user_id: int) -> List[User]:
+        """Get users who follow each other mutually"""
+        pass
+    
+    @abstractmethod
+    def get_follow_suggestions(self, user_id: int, limit: int = 10) -> List[User]:
+        """Get suggested users to follow"""
         pass
