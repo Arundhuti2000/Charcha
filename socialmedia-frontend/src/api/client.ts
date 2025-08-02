@@ -1,5 +1,5 @@
 import { tokenUtils } from "../utils/tokenUtils";
-const API_BASE = import.meta.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export const apiFetch = async (url: string, options?: RequestInit) => {
   const token = tokenUtils.get();

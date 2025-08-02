@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Eye, EyeOff, Users, MessageCircle, Heart, Share2 } from "lucide-react";
 import { useIsAuthenticated, useLogin } from "@/api/hooks/useAuth";
 import { toast } from "sonner";
+import LoadingButton from "@/components/ui/loading-button";
 
 const SocialHubLogin: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -72,8 +71,8 @@ const SocialHubLogin: React.FC = () => {
       loginMutation.mutate(
         { email: email, password: password },
         {
-          onSuccess: (response) => {
-            console.log("login was sucessful!", response);
+          onSuccess: () => {
+            console.log("login was sucessful!");
           },
           onError: (error) => {
             console.error("Login failed:", error);
@@ -176,9 +175,6 @@ const SocialHubLogin: React.FC = () => {
             <CardContent>
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                    Email Address
-                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -190,9 +186,6 @@ const SocialHubLogin: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                    Password
-                  </Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -222,20 +215,9 @@ const SocialHubLogin: React.FC = () => {
                   </a>
                 </div>
 
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isLoading}
-                  className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Signing in...</span>
-                    </div>
-                  ) : (
-                    "Sign In"
-                  )}
-                </Button>
+                <LoadingButton onClick={handleSubmit} isLoading={isLoading} loadingText="Signing in...">
+                  Sign In
+                </LoadingButton>
               </div>
             </CardContent>
 
@@ -243,9 +225,9 @@ const SocialHubLogin: React.FC = () => {
               <div className="w-full text-center">
                 <p className="text-gray-600">
                   Don't have an account?{" "}
-                  <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
-                    Sign up
-                  </a>
+                  <Link className="text-purple-600 hover:text-purple-700 font-semibold" to={"/signup"}>
+                    Sign in
+                  </Link>
                 </p>
               </div>
             </CardFooter>
