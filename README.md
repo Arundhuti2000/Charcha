@@ -147,7 +147,9 @@ npm run dev
 
 **Docker Deployment**
 ```bash
-docker-compose up --build
+docker build -t socialmedia-api:latest .
+docker tag socialmedia-api:latest acrsocialmedia01.azurecr.io/socialmedia-api:latest
+docker push acrsocialmedia01.azurecr.io/socialmedia-api:latest
 ```
 
 ---
