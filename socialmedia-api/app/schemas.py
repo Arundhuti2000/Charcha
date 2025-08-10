@@ -1,4 +1,4 @@
-from typing import Optional, Annotated
+from typing import List, Optional, Annotated
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 
@@ -62,3 +62,64 @@ class TokenData(BaseModel):
 class Vote(BaseModel):
     post_id: int
     dir: Annotated[int, Field(strict=True, le=1)]
+
+class FollowRequest(BaseModel):
+    following_id: int
+
+class FollowerResponse(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+    followed_at: datetime
+    class Config:
+        orm_mode = True
+
+class FollowingResponse(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+    started_following_at: datetime  # When the follow relationship was created
+    
+    class Config:
+        orm_mode = True
+
+class UserWithFollowStats(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+    followers_count: int
+    following_count: int
+    
+    class Config:
+        orm_mode = True
+
+class FollowStatus(BaseModel):
+    is_following: bool
+    is_followed_by: bool
+    is_mutual: bool
+
+class FollowersList(BaseModel):
+    followers: List[UserResponse]
+    total: int
+    skip: int
+    limit: int
+    has_more: bool
+
+class FollowingList(BaseModel):
+    following: List[UserResponse]
+    total: int
+    skip: int
+    limit: int
+    has_more: bool
+
+class UserStats(BaseModel):
+    user_id: int
+    email: EmailStr
+    followers_count: int
+    following_count: int
+    created_at: datetime
+
+class FollowActionResponse(BaseModel):
+    success: bool
+    message: str
+    user_stats: Optional[UserStats] = None

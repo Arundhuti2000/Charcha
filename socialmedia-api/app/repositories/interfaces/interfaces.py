@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 from ...models import Post, User, Votes, Followers
 
 class IPostRepository(ABC):

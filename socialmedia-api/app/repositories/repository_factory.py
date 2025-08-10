@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from .database.post_repository import PostRepository
 from .database.user_repository import UserRepository
 from .database.vote_repository import VoteRepository
-
+from .database.follower_repository import FollowerRepository
 
 class RepositoryFactory:
     @staticmethod
@@ -17,3 +17,6 @@ class RepositoryFactory:
     def create_vote_repository(db: Session) -> VoteRepository:
         return VoteRepository(db)
 
+    @staticmethod
+    def create_follower_repository(db:Session) -> FollowerRepository:
+        return FollowerRepository(db)
