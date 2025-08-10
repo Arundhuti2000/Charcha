@@ -23,8 +23,49 @@ class User(Base):
     created_at=Column(TIMESTAMP(timezone=True), server_default='now()',nullable=False)
     phone_number=Column(String(15), nullable=True)
 
+    followers = relationship(
+        "Followers", 
+        foreign_keys="Followers.following_id", 
+        back_populates="following_user",
+        cascade="all, delete-orphan"
+    )
+    
+    # Users - this user is following (this user is following them)
+    following = relationship(
+        "Followers", 
+        foreign_keys="Followers.follower_id", 
+        back_populates="follower_user",
+        cascade="all, delete-orphan"
+    )
+    
+
 class Votes(Base):
     __tablename__ = 'votes'
     post_id=Column(Integer, ForeignKey("posts.id", ondelete="CASCADE") ,primary_key=True, nullable=False)
     user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, nullable=False)
     dir = Column(Integer, nullable=False)
+
+class Followers(Base):
+    __tablename__ = 'followers'
+
+    follower_id=Column(Integer, ForeignKey("users.id", ondelete='CASCADE'),primary_key=True,nullable=False)
+    following_id=Column(Integer,ForeignKey("users.id", ondelete='CASCADE'), primary_key=True,nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default='now()', nullable=False)
+
+
+    # The user who is doing the following
+    follower_user = relationship(
+        "User", 
+        foreign_keys=[follower_id], 
+        back_populates="following"
+    )
+    
+    # The user who is being followed
+    following_user = relationship(
+        "User", 
+        foreign_keys=[following_id], 
+        back_populates="followers"
+    )
+    __table_args__ = (
+        # This will be handled by the database constraint we created in migration
+    )

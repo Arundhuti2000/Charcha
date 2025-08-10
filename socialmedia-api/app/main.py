@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine
-from .routes import post, user, auth, vote
+from .routes import post, user, auth, vote, follow
 from .config import settings
 
 # models.Base.metadata.create_all(bind=engine)
@@ -21,6 +21,7 @@ app.include_router(post.router)
 app.include_router(user.router) # goes into user file and import all the router types
 app.include_router(auth.router)
 app.include_router(vote.router)
+app.include_router(follow.router)
 
 @app.get("/")
 def read_root():
