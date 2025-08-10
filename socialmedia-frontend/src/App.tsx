@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { Dashboard } from "./pages/dashboard";
+import SignUp from "./pages/signup";
 function App() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/signup" element={<SignUp />} />
         </Routes>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
