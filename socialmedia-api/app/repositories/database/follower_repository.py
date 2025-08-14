@@ -7,7 +7,7 @@ from ...models import Post, Votes, User, Followers
 
 class FollowerRepository(BaseRepository[Followers], IFollowerRepository):
     def __init__(self, db: Session):
-        super().__init__(db, Post)
+        super().__init__(db, Followers)
         
     def is_following(self, follower_id: int, following_id: int) -> bool:
         follow_exists = self.db.query(Followers).filter(
