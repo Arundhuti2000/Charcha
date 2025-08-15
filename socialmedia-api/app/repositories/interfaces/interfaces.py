@@ -105,7 +105,7 @@ class IFollowerRepository(ABC):
         """Get users who follow each other mutually"""
         pass
     
-    @abstractmethod
-    def get_follow_suggestions(self, user_id: int, limit: int = 10) -> List[User]:
-        """Get suggested users to follow"""
-        pass
+    # @abstractmethod
+    # def get_follow_suggestions(self, user_id: int, limit: int = 10) -> List[User]:
+    #     """Get suggested users to follow"""
+    #     pass

@@ -35,6 +35,7 @@ class PostwithVote(BaseModel):
     Votes: int
     Upvotes: int
     Downvotes: int
+    has_liked: bool = False
     class Config:
         orm_mode = True
 

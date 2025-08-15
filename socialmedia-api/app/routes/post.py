@@ -14,7 +14,9 @@ router = APIRouter(
 
 @router.get("/", response_model=List[schemas.PostwithVote])
 def get_all_posts(post_repo: PostRepository = Depends(get_post_repository),get_current_user:int = Depends(oauth2.get_current_user), limit: int = 10, skip: int=0, search: Optional[str]= ""):
-    posts= post_repo.get_posts_with_votes(skip, limit, search)
+    posts= post_repo.get_posts_with_votes(get_current_user.id,skip, limit, search)
+    # print("route")
+    # print(posts)
     return posts
     # posts=db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
     # posts = db.query(models.Post, func.count(models.Votes.post_id).label("Votes"),func.count(case((models.Votes.dir == 1, 1))).label("Upvotes"),
@@ -36,7 +38,7 @@ def get_own_posts(post_repo: PostRepository = Depends(get_post_repository),get_c
 def get_post(id:int, post_repo: PostRepository = Depends(get_post_repository), get_current_user:int = Depends(oauth2.get_current_user)):
     try:
         print(f"PostId:{id}")
-        post = post_repo.get_post_with_votes_by_id(id)
+        post = post_repo.get_post_with_votes_by_id(id,get_current_user.id)
         # post=db.query(models.Post,  func.count(models.Votes.post_id).label("Votes"),func.count(case((models.Votes.dir == 1, 1))).label("Upvotes"),
         # func.count(case((models.Votes.dir == -1, 1))).label("Downvotes")).outerjoin(models.Votes, models.Votes.post_id == models.Post.id).filter(models.Post.id==id).group_by(models.Post.id).first()
     except:
