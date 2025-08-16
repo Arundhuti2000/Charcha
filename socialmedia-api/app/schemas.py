@@ -22,6 +22,14 @@ class UserResponse(BaseModel):
     created_at: datetime
     class Config:
         orm_mode = True
+
+    # Future fields to add
+    bio: Optional[str] = None
+    avatar_url: Optional[str] = None
+    location: Optional[str] = None
+    class Config:
+        orm_mode = True
+
 class PostResponse(PostBase):
     id: int
     created_at: datetime
@@ -43,6 +51,27 @@ class UserBase(BaseModel):
     email: EmailStr
     password: str
     phone_number: Optional[str] = None
+
+
+class CurrentUserProfile(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+    phone_number: Optional[str] = None
+
+    followers_count: int
+    following_count: int
+    posts_count: int
+    total_votes_received: int
+    total_upvotes_received: int
+    total_downvotes_received: int
+
+    is_following: Optional[bool] = None  # Am I following this user?
+    is_followed_by: Optional[bool] = None  # Does this user follow me?
+    is_mutual: Optional[bool] = None
+
+    last_active: Optional[datetime] = None
+    most_popular_post: Optional[PostResponse] = None
 
 class CreateUser(UserBase):
     pass
@@ -124,3 +153,9 @@ class FollowActionResponse(BaseModel):
     success: bool
     message: str
     user_stats: Optional[UserStats] = None
+
+class UpdateEmailRequest(BaseModel):
+    new_email: EmailStr
+
+class UpdatePhoneRequest(BaseModel):
+    phone_number: str
