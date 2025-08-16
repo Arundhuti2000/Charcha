@@ -91,7 +91,7 @@ def search_users(
     users = user_repo.search_users(q.strip(), skip, limit)
     return users
 
-@router.get("/", response_model=schemas.UserWithStats)
+@router.get("/", response_model=schemas.UserStats)
 def get_current_user_profile(
     user_repo: UserRepository = Depends(get_user_repository), 
     current_user: int = Depends(oauth2.get_current_user)

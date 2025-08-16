@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy import Tuple, case, func
+from sqlalchemy import Boolean, Tuple, case, func
 from sqlalchemy.orm import Session
 from .base_repository import BaseRepository
 from ..interfaces.interfaces import IUserRepository
@@ -135,7 +135,27 @@ class UserRepository(BaseRepository[User], IUserRepository):
     
     def get_user_with_stats(self, user_id: int, current_user_id: int = None) -> Optional[Tuple]:
         """Get user with stats using tuple approach similar to posts with votes"""
+        is_following = None
+        is_followed_by = None
+        is_mutual = None
         
+        if current_user_id is not None and current_user_id != user_id:
+            # Check if current user follows target user
+            following_check = self.db.query(Followers).filter(
+                Followers.follower_id == current_user_id,
+                Followers.following_id == user_id
+            ).first()
+            is_following = following_check is not None
+            
+            # Check if target user follows current user
+            followed_by_check = self.db.query(Followers).filter(
+                Followers.follower_id == user_id,
+                Followers.following_id == current_user_id
+            ).first()
+            is_followed_by = followed_by_check is not None
+            
+            # Mutual is true if both conditions are true
+            is_mutual = is_following and is_followed_by
         result = (
             self.db.query(
                 User,
@@ -152,17 +172,9 @@ class UserRepository(BaseRepository[User], IUserRepository):
                 # Total downvotes received
                 func.coalesce(self.db.query(func.count(case((Votes.dir == -1, 1)))).join(Post, Post.id == Votes.post_id).filter(Post.user_id == user_id).scalar_subquery(),0).label('total_downvotes_received'),
                 # Is following (only if current_user_id provided and different)
-                case((current_user_id is not None and current_user_id != user_id,
-                    self.db.query(func.count(Followers.follower_id) > 0).filter(Followers.follower_id == current_user_id,Followers.following_id == user_id).scalar_subquery()),else_=None).label('is_following'), 
-                # Is followed by
-                case((current_user_id is not None and current_user_id != user_id,self.db.query(func.count(Followers.follower_id) > 0).filter(Followers.follower_id == user_id, Followers.following_id == current_user_id).scalar_subquery()),else_=None).label('is_followed_by'),
-                
-                # Is mutual (both following each other)
-                case((current_user_id is not None and current_user_id != user_id,(self.db.query(func.count(Followers.follower_id) > 0).filter(Followers.follower_id == current_user_id,Followers.following_id == user_id)
-                    .scalar_subquery()) &
-                    (self.db.query(func.count(Followers.follower_id) > 0)
-                    .filter( Followers.follower_id == user_id,Followers.following_id == current_user_id)
-                    .scalar_subquery())),
-                    else_=None).label('is_mutual')).filter(User.id == user_id).first()
-        )
+                func.cast(is_following, Boolean).label('is_following') ,
+                func.cast(is_followed_by, Boolean).label('is_followed_by') ,
+                func.cast(is_mutual, Boolean).label('is_mutual') 
+        ).filter(User.id == user_id)
+        .first())
         return result

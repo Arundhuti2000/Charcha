@@ -156,6 +156,15 @@ class FollowingList(BaseModel):
     limit: int
     has_more: bool
 
+class UserStats(BaseModel):
+    """Complete user profile with stats - matches tuple structure"""
+    User: UserResponse  # The User object
+    followers_count: int
+    following_count: int
+    posts_count: int
+    total_votes_received: int
+    total_upvotes_received: int
+    total_downvotes_received: int
 
 class UserWithStats(BaseModel):
     """Complete user profile with stats - matches tuple structure"""
