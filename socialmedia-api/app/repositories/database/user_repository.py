@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from sqlalchemy import case, func
 from sqlalchemy.orm import Session
 from .base_repository import BaseRepository
@@ -13,8 +13,16 @@ class UserRepository(BaseRepository[User], IUserRepository):
         #Query from routes/auth.py and routes/user.py
         return self.db.query(User).filter(User.email == email).first()
     
+    def get_by_username(self, username: str) -> Optional[User]: 
+        """Get user by username"""
+        return self.db.query(User).filter(User.username == username).first()
+    
     def email_exists(self, email: str) -> bool:
         return self.db.query(User).filter(User.email == email).first() is not None
+    
+    def username_exists(self, username: str) -> bool: 
+        """Check if username already exists"""
+        return self.db.query(User).filter(User.username == username).first() is not None
     
     def create_with_hashed_password(self, email: str, hashed_password: str, phone_number: str = None) -> User: #create_user()
         return self.create(
@@ -22,6 +30,25 @@ class UserRepository(BaseRepository[User], IUserRepository):
             password=hashed_password,
             phone_number=phone_number
         )
+    
+    def update_username(self, user_id: int, new_username: str) -> Optional[User]:
+        """Update user's username"""
+        # Check if username already exists
+        if self.username_exists(new_username):
+            return None
+        return self.update(user_id, username=new_username)
+    
+    def update_full_name(self, user_id: int, full_name: str) -> Optional[User]: 
+        """Update user's full name"""
+        return self.update(user_id, full_name=full_name)
+    
+    def search_users(self, search_term: str, skip: int = 0, limit: int = 10) -> List[User]:
+        """Search users by username, full_name, or email"""
+        return self.db.query(User).filter(
+            (User.username.ilike(f"%{search_term}%")) |
+            (User.full_name.ilike(f"%{search_term}%")) |
+            (User.email.ilike(f"%{search_term}%"))
+        ).offset(skip).limit(limit).all()
     
     def get_user_profile_data(self, user_id: int) -> Optional[User]:
         user = self.get_by_id(user_id)

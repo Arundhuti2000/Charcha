@@ -28,11 +28,19 @@ class IUserRepository(ABC):
     def get_by_email(self, email: str) -> Optional[User]:
         """Get user by email address"""
         pass
+    @abstractmethod
+    def get_by_username(self, username: str) -> Optional[User]:  # NEW
+        pass
     
     @abstractmethod
     def email_exists(self, email: str) -> bool:
         """Check if email already exists"""
         pass
+
+    @abstractmethod
+    def username_exists(self, username: str) -> bool:  # NEW
+        pass
+
     
     @abstractmethod
     def create_with_hashed_password(self, email: str, hashed_password: str, phone_number: str = None) -> User:
@@ -44,30 +52,42 @@ class IUserRepository(ABC):
         """Get user profile data"""
         pass
 
-    # @abstractmethod
-    # def update_user_email(self, user_id: int, new_email: str) -> Optional[User]:
-    #     """Update user's email address"""
-    #     pass
+    @abstractmethod
+    def update_user_email(self, user_id: int, new_email: str) -> Optional[User]:
+        """Update user's email address"""
+        pass
 
-    # @abstractmethod
-    # def update_user_phone(self, user_id: int, phone_number: str) -> Optional[User]:
-    #     """Update user's phone number"""
-    #     pass
+    @abstractmethod
+    def update_user_phone(self, user_id: int, phone_number: str) -> Optional[User]:
+        """Update user's phone number"""
+        pass
+
+    @abstractmethod
+    def update_username(self, user_id: int, new_username: str) -> Optional[User]:
+        pass
+
+    @abstractmethod
+    def update_full_name(self, user_id: int, full_name: str) -> Optional[User]: 
+        pass
     
-    # @abstractmethod
-    # def get_user_vote_statistics(self, user_id: int) -> dict:
-    #     """Get total vote statistics for all user's posts"""
-    #     pass
+    @abstractmethod
+    def search_users(self, search_term: str, skip: int = 0, limit: int = 10) -> List[User]: 
+        pass
+    
+    @abstractmethod
+    def get_user_vote_statistics(self, user_id: int) -> dict:
+        """Get total vote statistics for all user's posts"""
+        pass
 
-    # @abstractmethod
-    # def get_user_posts_count(self, user_id: int) -> int:
-    #     """Get total number of posts by user"""
-    #     pass
+    @abstractmethod
+    def get_user_posts_count(self, user_id: int) -> int:
+        """Get total number of posts by user"""
+        pass
 
-    # @abstractmethod 
-    # def get_most_popular_post(self, user_id: int) -> Optional[dict]:
-    #     """Get the most popular post by vote count"""
-    #     pass
+    @abstractmethod 
+    def get_most_popular_post(self, user_id: int) -> Optional[dict]:
+        """Get the most popular post by vote count"""
+        pass
 
 class IVoteRepository(ABC):
     @abstractmethod

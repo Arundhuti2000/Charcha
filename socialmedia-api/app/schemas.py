@@ -1,5 +1,6 @@
+import re
 from typing import List, Optional, Annotated
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, validator
 from datetime import datetime
 
 class PostBase(BaseModel):
@@ -19,6 +20,8 @@ class UpdatePost(PostBase):
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
+    username: Optional[str] = None 
+    full_name: Optional[str] = None
     created_at: datetime
     class Config:
         orm_mode = True
@@ -50,12 +53,27 @@ class PostwithVote(BaseModel):
 class UserBase(BaseModel):
     email: EmailStr
     password: str
+    username: Optional[str] = None  
+    full_name: Optional[str] = None
     phone_number: Optional[str] = None
 
+    @validator('username')
+    def validate_username(cls, v):
+        if v is not None:
+            if not re.match("^[a-zA-Z0-9_]{3,50}$", v):
+                raise ValueError('Username must be 3-50 characters and contain only letters, numbers, and underscores')
+        return v
+    @validator('full_name')
+    def validate_full_name(cls, v):
+        if v is not None and len(v.strip()) < 2:
+            raise ValueError('Full name must be at least 2 characters')
+        return v.strip() if v else None
 
 class CurrentUserProfile(BaseModel):
     id: int
     email: EmailStr
+    username: Optional[str] = None 
+    full_name: Optional[str] = None
     created_at: datetime
     phone_number: Optional[str] = None
 
@@ -76,7 +94,29 @@ class CurrentUserProfile(BaseModel):
 class CreateUser(UserBase):
     pass
 
+class UpdateEmailRequest(BaseModel):
+    new_email: EmailStr
 
+class UpdatePhoneRequest(BaseModel):
+    phone_number: str
+
+class UpdateUsernameRequest(BaseModel):
+    username: str
+    
+    @validator('username')
+    def validate_username(cls, v):
+        if not re.match("^[a-zA-Z0-9_]{3,50}$", v):
+            raise ValueError('Username must be 3-50 characters and contain only letters, numbers, and underscores')
+        return v
+
+class UpdateFullNameRequest(BaseModel):
+    full_name: str
+    
+    @validator('full_name')
+    def validate_full_name(cls, v):
+        if len(v.strip()) < 2:
+            raise ValueError('Full name must be at least 2 characters')
+        return v.strip()
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -154,8 +194,3 @@ class FollowActionResponse(BaseModel):
     message: str
     user_stats: Optional[UserStats] = None
 
-class UpdateEmailRequest(BaseModel):
-    new_email: EmailStr
-
-class UpdatePhoneRequest(BaseModel):
-    phone_number: str
