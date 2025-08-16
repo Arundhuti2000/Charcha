@@ -91,13 +91,13 @@ def search_users(
     users = user_repo.search_users(q.strip(), skip, limit)
     return users
 
-@router.get("/", response_model=schemas.CurrentUserProfile)
+@router.get("/", response_model=schemas.UserWithStats)
 def get_current_user_profile(
     user_repo: UserRepository = Depends(get_user_repository), 
     current_user: int = Depends(oauth2.get_current_user)
 ):
     """Get comprehensive profile for the current authenticated user"""
-    profile = user_repo.get_comprehensive_profile(current_user.id)
+    profile = user_repo.get_user_with_stats(current_user.id)
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
@@ -105,17 +105,17 @@ def get_current_user_profile(
         )
     return profile
 
-@router.get("/{id}", response_model=schemas.CurrentUserProfile)
+@router.get("/{id}", response_model=schemas.UserWithStats)
 def get_user(
     id: int,
     user_repo: UserRepository = Depends(get_user_repository), 
     current_user: int = Depends(oauth2.get_current_user)
 ):
     """Get profile for any user (with relationship status if viewing another user)"""
-    profile = user_repo.get_comprehensive_profile(id, current_user.id)
-    if not profile:
+    user_with_stats = user_repo.get_user_with_stats(id, current_user.id)
+    if not user_with_stats:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail=f"User with id {id} not found"
         )
-    return profile
+    return user_with_stats

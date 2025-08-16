@@ -23,13 +23,11 @@ class UserResponse(BaseModel):
     username: Optional[str] = None 
     full_name: Optional[str] = None
     created_at: datetime
-    class Config:
-        orm_mode = True
 
-    # Future fields to add
-    bio: Optional[str] = None
-    avatar_url: Optional[str] = None
-    location: Optional[str] = None
+    # # Future fields to add
+    # bio: Optional[str] = None
+    # avatar_url: Optional[str] = None
+    # location: Optional[str] = None
     class Config:
         orm_mode = True
 
@@ -68,28 +66,6 @@ class UserBase(BaseModel):
         if v is not None and len(v.strip()) < 2:
             raise ValueError('Full name must be at least 2 characters')
         return v.strip() if v else None
-
-class CurrentUserProfile(BaseModel):
-    id: int
-    email: EmailStr
-    username: Optional[str] = None 
-    full_name: Optional[str] = None
-    created_at: datetime
-    phone_number: Optional[str] = None
-
-    followers_count: int
-    following_count: int
-    posts_count: int
-    total_votes_received: int
-    total_upvotes_received: int
-    total_downvotes_received: int
-
-    is_following: Optional[bool] = None  # Am I following this user?
-    is_followed_by: Optional[bool] = None  # Does this user follow me?
-    is_mutual: Optional[bool] = None
-
-    last_active: Optional[datetime] = None
-    most_popular_post: Optional[PostResponse] = None
 
 class CreateUser(UserBase):
     pass
@@ -154,9 +130,7 @@ class FollowingResponse(BaseModel):
         orm_mode = True
 
 class UserWithFollowStats(BaseModel):
-    id: int
-    email: EmailStr
-    created_at: datetime
+    User: UserResponse
     followers_count: int
     following_count: int
     
@@ -182,15 +156,26 @@ class FollowingList(BaseModel):
     limit: int
     has_more: bool
 
-class UserStats(BaseModel):
-    user_id: int
-    email: EmailStr
+
+class UserWithStats(BaseModel):
+    """Complete user profile with stats - matches tuple structure"""
+    User: UserResponse  # The User object
     followers_count: int
     following_count: int
-    created_at: datetime
+    posts_count: int
+    total_votes_received: int
+    total_upvotes_received: int
+    total_downvotes_received: int
+    is_following: Optional[bool] = None
+    is_followed_by: Optional[bool] = None
+    is_mutual: Optional[bool] = None
+    # most_popular_post: Optional['PostResponse'] = None
+    
+    class Config:
+        orm_mode = True
 
 class FollowActionResponse(BaseModel):
     success: bool
     message: str
-    user_stats: Optional[UserStats] = None
+    user_stats: Optional[UserWithFollowStats] = None
 

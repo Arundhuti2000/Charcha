@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy import case, func
+from sqlalchemy import Tuple, case, func
 from sqlalchemy.orm import Session
 from .base_repository import BaseRepository
 from ..interfaces.interfaces import IUserRepository
@@ -24,9 +24,11 @@ class UserRepository(BaseRepository[User], IUserRepository):
         """Check if username already exists"""
         return self.db.query(User).filter(User.username == username).first() is not None
     
-    def create_with_hashed_password(self, email: str, hashed_password: str, phone_number: str = None) -> User: #create_user()
+    def create_with_hashed_password(self, email: str, hashed_password: str, username: str = None, full_name: str = None,phone_number: str = None) -> User: #create_user()
         return self.create(
             email=email,
+            username=username,
+            full_name=full_name,
             password=hashed_password,
             phone_number=phone_number
         )
@@ -123,62 +125,44 @@ class UserRepository(BaseRepository[User], IUserRepository):
                 "owner": {
                     "id": post.owner.id,
                     "email": post.owner.email,
+                    "username": post.owner.username,  
+                    "full_name": post.owner.full_name,
                     "created_at": post.owner.created_at
                 }
             }
         
         return None
-
-    def get_comprehensive_profile(self, user_id: int, current_user_id: int = None) -> Optional[dict]:
-        """Get comprehensive user profile with all stats"""
-        user = self.get_by_id(user_id)
-        if not user:
-            return None
+    
+    def get_user_with_stats(self, user_id: int, current_user_id: int = None) -> Optional[Tuple]:
+        """Get user with stats using tuple approach similar to posts with votes"""
         
-        # Import here to avoid circular imports
-        from .follower_repository import FollowerRepository
-        
-        # Create follower repository instance
-        follower_repo = FollowerRepository(self.db)
-        
-        # Get social stats
-        follower_count = follower_repo.get_follower_count(user_id)
-        following_count = follower_repo.get_following_count(user_id)
-        
-        # Get posts count
-        posts_count = self.get_user_posts_count(user_id)
-        
-        # Get vote statistics
-        vote_stats = self.get_user_vote_statistics(user_id)
-        
-        # Get most popular post
-        most_popular_post = self.get_most_popular_post(user_id)
-        
-        # Get relationship status if viewing another user
-        is_following = None
-        is_followed_by = None
-        is_mutual = None
-        
-        if current_user_id and current_user_id != user_id:
-            follow_status = follower_repo.get_user_follow_status(current_user_id, user_id)
-            is_following = follow_status["is_following"]
-            is_followed_by = follow_status["is_followed_by"]
-            is_mutual = follow_status["is_mutual"]
-        
-        return {
-            "id": user.id,
-            "email": user.email,
-            "created_at": user.created_at,
-            "phone_number": user.phone_number,
-            "followers_count": follower_count,
-            "following_count": following_count,
-            "posts_count": posts_count,
-            "total_votes_received": vote_stats["total_votes"],
-            "total_upvotes_received": vote_stats["total_upvotes"],
-            "total_downvotes_received": vote_stats["total_downvotes"],
-            "is_following": is_following,
-            "is_followed_by": is_followed_by,
-            "is_mutual": is_mutual,
-            "last_active": user.created_at,  # You can update this with actual last activity later
-            "most_popular_post": most_popular_post
-        }
+        result = (
+            self.db.query(
+                User,
+                # Follower count
+                func.coalesce(self.db.query(func.count(Followers.follower_id)).filter(Followers.following_id == user_id).scalar_subquery(),0).label('followers_count'),
+                # Following count  
+                func.coalesce(self.db.query(func.count(Followers.following_id)).filter(Followers.follower_id == user_id).scalar_subquery(),0).label('following_count'),
+                # Posts count
+                func.coalesce(self.db.query(func.count(Post.id)).filter(Post.user_id == user_id).scalar_subquery(),0).label('posts_count'),
+                # Total votes received
+                func.coalesce(self.db.query(func.count(Votes.post_id)).join(Post, Post.id == Votes.post_id).filter(Post.user_id == user_id).scalar_subquery(),0).label('total_votes_received'),
+                # Total upvotes received
+                func.coalesce(self.db.query(func.count(case((Votes.dir == 1, 1)))).join(Post, Post.id == Votes.post_id).filter(Post.user_id == user_id).scalar_subquery(),0).label('total_upvotes_received'),
+                # Total downvotes received
+                func.coalesce(self.db.query(func.count(case((Votes.dir == -1, 1)))).join(Post, Post.id == Votes.post_id).filter(Post.user_id == user_id).scalar_subquery(),0).label('total_downvotes_received'),
+                # Is following (only if current_user_id provided and different)
+                case((current_user_id is not None and current_user_id != user_id,
+                    self.db.query(func.count(Followers.follower_id) > 0).filter(Followers.follower_id == current_user_id,Followers.following_id == user_id).scalar_subquery()),else_=None).label('is_following'), 
+                # Is followed by
+                case((current_user_id is not None and current_user_id != user_id,self.db.query(func.count(Followers.follower_id) > 0).filter(Followers.follower_id == user_id, Followers.following_id == current_user_id).scalar_subquery()),else_=None).label('is_followed_by'),
+                
+                # Is mutual (both following each other)
+                case((current_user_id is not None and current_user_id != user_id,(self.db.query(func.count(Followers.follower_id) > 0).filter(Followers.follower_id == current_user_id,Followers.following_id == user_id)
+                    .scalar_subquery()) &
+                    (self.db.query(func.count(Followers.follower_id) > 0)
+                    .filter( Followers.follower_id == user_id,Followers.following_id == current_user_id)
+                    .scalar_subquery())),
+                    else_=None).label('is_mutual')).filter(User.id == user_id).first()
+        )
+        return result

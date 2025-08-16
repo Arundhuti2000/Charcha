@@ -171,26 +171,3 @@ def get_user_following(
         user_id, skip, limit
     )
     return following_data
-
-@router.get("/users/{user_id}/stats", response_model=schemas.UserStats)
-def get_user_stats(
-    user_id: int,
-    follower_repo: FollowerRepository = Depends(get_follower_repository),
-    user_repo: UserRepository = Depends(get_user_repository),
-    current_user: int = Depends(oauth2.get_current_user)
-):
-    target_user = user_repo.get_by_id(user_id)
-    if not target_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {user_id} not found"
-        )
-    
-    user_stats = follower_repo.get_user_stats(user_id)
-    if not user_stats:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Stats not found for user {user_id}"
-        )
-    
-    return user_stats

@@ -53,6 +53,11 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
+    def get_user_with_stats(self, user_id: int, current_user_id: int = None) -> Optional[Tuple]:
+        """Get user with comprehensive stats using tuple approach"""
+        pass
+
+    @abstractmethod
     def update_user_email(self, user_id: int, new_email: str) -> Optional[User]:
         """Update user's email address"""
         pass
