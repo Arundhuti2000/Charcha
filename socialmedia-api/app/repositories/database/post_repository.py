@@ -9,12 +9,13 @@ class PostRepository(BaseRepository[Post], IPostRepository):
     def __init__(self, db: Session):
         super().__init__(db, Post)
         
-    def get_posts_with_votes(self, skip: int = 0, limit: int = 10, search: str = "") -> List[Tuple]: #get_all_posts
+    def get_posts_with_votes(self, current_user_id:int,skip: int = 0, limit: int = 10, search: str = "") -> List[Tuple]: #get_all_posts
         post = self.db.query(
                 Post, 
                 func.count(Votes.post_id).label("Votes"),
                 func.count(case((Votes.dir == 1, 1))).label("Upvotes"),
-                func.count(case((Votes.dir == -1, 1))).label("Downvotes")
+                func.count(case((Votes.dir == -1, 1))).label("Downvotes"),
+                case((func.max(case((Votes.user_id == current_user_id, Votes.dir))).in_([1, -1]), True), else_=False).label("has_liked")
             ).join(Votes, Votes.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.title.contains(search)).limit(limit).offset(skip).all()
         return post
     def get_user_posts_with_votes(self, user_id, skip = 0, limit = 10): #get_own_posts
@@ -22,16 +23,19 @@ class PostRepository(BaseRepository[Post], IPostRepository):
                 Post,
                 func.count(Votes.post_id).label("Votes"),
                 func.count(case((Votes.dir == 1, 1))).label("Upvotes"),
-                func.count(case((Votes.dir == -1, 1))).label("Downvotes")
+                func.count(case((Votes.dir == -1, 1))).label("Downvotes"),
+                case((func.max(case((Votes.user_id == user_id, Votes.dir))).in_([1, -1]), True), else_=False).label("has_liked")
             ).join(Votes, Votes.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.user_id == user_id).limit(limit).offset(skip).all()
         return post
-    def get_post_with_votes_by_id(self, post_id: int)-> Optional[Tuple]: #get_post()
+    def get_post_with_votes_by_id(self, post_id: int,current_user_id: int)-> Optional[Tuple]: #get_post()
         print(post_id)
         post=self.db.query(
             Post, 
             func.count(Votes.post_id).label("Votes"),
             func.count(case((Votes.dir == 1, 1))).label("Upvotes"),
-            func.count(case((Votes.dir == -1, 1))).label("Downvotes")).outerjoin(Votes,Votes.post_id==Post.id).filter(Post.id==post_id).group_by(Post.id).first()
+            func.count(case((Votes.dir == -1, 1))).label("Downvotes"),
+            case((func.max(case((Votes.user_id == current_user_id, Votes.dir))).in_([1, -1]), True), else_=False).label("has_liked")
+            ).outerjoin(Votes,Votes.post_id==Post.id).filter(Post.id==post_id).group_by(Post.id).first()
         return post
     def get_posts_by_user_id(self, user_id: int) -> List[Post]:
         return self.db.query(Post).filter(Post.user_id == user_id).all()

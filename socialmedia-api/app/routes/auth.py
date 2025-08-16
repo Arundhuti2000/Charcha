@@ -12,6 +12,8 @@ def login(user_credentials: OAuth2PasswordRequestForm=Depends(), user_repo: User
 
     #the OAuthPasswordReuestForm returns username and password and not email and password
     user=user_repo.get_by_email(user_credentials.username)
+    if not user:
+        user = user_repo.get_by_username(user_credentials.username)
     # user=db.query(models.User).filter(models.User.email==user_credentials.username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
@@ -31,10 +33,17 @@ def create_user(user: schemas.CreateUser,user_repo: UserRepository = Depends(get
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this email already exists"
         )
+    if user.username and user_repo.username_exists(user.username):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username already taken"
+        )
     hash_password=utils.hash(user.password)
     # user.password = hash_password
     new_user=user_repo.create_with_hashed_password(
         email=user.email,
+        username=user.username,
+        full_name=user.full_name,
         hashed_password=hash_password,
         phone_number=user.phone_number
     )

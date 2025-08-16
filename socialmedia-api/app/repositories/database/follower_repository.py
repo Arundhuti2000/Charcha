@@ -7,7 +7,7 @@ from ...models import Post, Votes, User, Followers
 
 class FollowerRepository(BaseRepository[Followers], IFollowerRepository):
     def __init__(self, db: Session):
-        super().__init__(db, Post)
+        super().__init__(db, Followers)
         
     def is_following(self, follower_id: int, following_id: int) -> bool:
         follow_exists = self.db.query(Followers).filter(
@@ -76,21 +76,17 @@ class FollowerRepository(BaseRepository[Followers], IFollowerRepository):
         return count
     
     #Get follower and following counts for a user
-    def get_user_stats(self, user_id: int) -> Dict:
-        user = self.db.query(User).filter(User.id == user_id).first()
-        if not user:
-            return None
+    def get_user_stats(self, user_id: int) -> Optional[Tuple]:
+        """Get user with follow stats using tuple approach like PostWithVote"""
         
-        follower_count = self.get_follower_count(user_id)
-        following_count = self.get_following_count(user_id)
-        
-        return {
-            "user_id": user_id,
-            "email": user.email,
-            "followers_count": follower_count,
-            "following_count": following_count,
-            "created_at": user.created_at
-        }
+        result = (self.db.query(User,
+                # Follower count
+                func.coalesce(self.db.query(func.count(Followers.follower_id)).filter(Followers.following_id == user_id).scalar_subquery(),0).label('followers_count'),
+                
+                # Following count
+                func.coalesce(self.db.query(func.count(Followers.following_id)).filter(Followers.follower_id == user_id).scalar_subquery(), 0).label('following_count')).filter(User.id == user_id).first()
+        )
+        return result
     
     #Get users who follow each other mutually
     def get_mutual_follows(self, user_id: int) -> List[User]:
