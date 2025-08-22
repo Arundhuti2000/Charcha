@@ -1,3 +1,4 @@
+from enum import Enum
 import re
 from typing import List, Optional, Annotated
 from pydantic import BaseModel, EmailStr, Field, validator
@@ -187,4 +188,29 @@ class FollowActionResponse(BaseModel):
     success: bool
     message: str
     user_stats: Optional[UserWithFollowStats] = None
+
+
+class FeedType(str, Enum):
+    CHRONOLOGICAL = "chronological"
+    FOLLOWING = "following"
+    TRENDING = "trending"
+    RECOMMENDED = "recommended"
+
+class FeedRequest(BaseModel):
+    feed_type: FeedType = FeedType.FOLLOWING
+    limit: int = Field(default=20, le=100)
+    skip: int = Field(default=0, ge=0)
+    timeframe: Optional[str] = "24h"  # For trending: "1h", "6h", "24h", "7d"
+
+class TrendingPost(BaseModel):
+    Post: PostResponse
+    Votes: int
+    Upvotes: int
+    Downvotes: int
+    has_liked: bool = False
+    trend_score: float  
+    vote_velocity: float  
+    
+    class Config:
+        orm_mode = True
 
