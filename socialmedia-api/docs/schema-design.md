@@ -43,6 +43,7 @@ CREATE TABLE users (
 ```
 
 **Field Descriptions**:
+
 - `id`: Auto-incrementing primary key
 - `email`: Unique email address for authentication
 - `username`: Optional unique username (3-50 chars, alphanumeric + underscore)
@@ -52,6 +53,7 @@ CREATE TABLE users (
 - `created_at`: Account creation timestamp
 
 **Constraints**:
+
 - Email must be unique and valid format
 - Username must be unique when provided
 - Password is required and stored hashed
@@ -75,6 +77,7 @@ CREATE TABLE posts (
 ```
 
 **Field Descriptions**:
+
 - `id`: Auto-incrementing primary key
 - `title`: Post title (max 100 chars)
 - `content`: Post content (max 1000 chars)
@@ -85,6 +88,7 @@ CREATE TABLE posts (
 - `created_at`: Post creation timestamp
 
 **Relationships**:
+
 - **Many-to-One** with Users: Each post belongs to one user
 - **One-to-Many** with Votes: Each post can have multiple votes
 
@@ -102,17 +106,20 @@ CREATE TABLE votes (
 ```
 
 **Field Descriptions**:
+
 - `post_id`: Foreign key to voted post
 - `user_id`: Foreign key to voting user
 - `dir`: Vote direction (1 = upvote, -1 = downvote)
 
 **Constraints**:
+
 - Composite primary key prevents duplicate votes
 - Each user can only vote once per post
 - Vote direction must be 1 or -1
 - Cascading deletes maintain referential integrity
 
 **Business Rules**:
+
 - Users cannot vote on their own posts (enforced in application)
 - Users can change their vote direction
 - Users can remove their vote (delete record)
@@ -132,16 +139,19 @@ CREATE TABLE followers (
 ```
 
 **Field Descriptions**:
+
 - `follower_id`: User who is following (the follower)
 - `following_id`: User being followed (the followee)
 - `created_at`: When the follow relationship was created
 
 **Constraints**:
+
 - Composite primary key prevents duplicate follows
 - Check constraint prevents self-following
 - Cascading deletes maintain referential integrity
 
 **Relationship Types**:
+
 - **Unidirectional**: A follows B (but B doesn't follow A)
 - **Mutual**: A follows B AND B follows A
 - **No Relationship**: Neither follows the other
@@ -150,7 +160,8 @@ CREATE TABLE followers (
 
 ### 1. Authentication Strategy
 
-**Email + Username Login**: 
+**Email + Username Login**:
+
 - Primary: Email (required, unique)
 - Secondary: Username (optional, unique when provided)
 - Both can be used for login authentication
@@ -160,11 +171,13 @@ CREATE TABLE followers (
 ### 2. Vote System Design
 
 **Composite Primary Key**: `(post_id, user_id)`
+
 - Prevents duplicate votes naturally
 - Efficient lookups for user's vote on specific post
 - Atomic vote changes (update vs insert/delete)
 
 **Vote Direction Values**:
+
 - `1`: Upvote (positive)
 - `-1`: Downvote (negative)
 - No record: No vote
@@ -174,11 +187,13 @@ CREATE TABLE followers (
 ### 3. Follow System Design
 
 **Asymmetric Following**: Like Twitter/Instagram model
+
 - Following doesn't require mutual consent
 - Separate from "friendship" models
 - Allows for influencer/follower dynamics
 
 **Mutual Detection**: Calculated, not stored
+
 - Reduces data duplication
 - Always accurate (computed from current state)
 - Efficient with proper indexing
@@ -188,7 +203,8 @@ CREATE TABLE followers (
 **Title**: 100 characters
 **Content**: 1000 characters
 
-**Rationale**: 
+**Rationale**:
+
 - Encourages concise, focused content
 - Prevents database bloat
 - Improves performance
@@ -197,6 +213,7 @@ CREATE TABLE followers (
 ### 5. Soft vs Hard Deletes
 
 **Hard Deletes Used**: All deletes are permanent
+
 - `ON DELETE CASCADE` maintains referential integrity
 - Reduces storage complexity
 - Simplified queries (no deleted flag checks)
@@ -206,11 +223,13 @@ CREATE TABLE followers (
 ## Data Integrity
 
 ### Referential Integrity
+
 - All foreign keys use `ON DELETE CASCADE`
 - Prevents orphaned records
 - Maintains data consistency
 
 ### Application-Level Constraints
+
 - Password hashing (bcrypt)
 - Username format validation
 - Email format validation
@@ -218,6 +237,7 @@ CREATE TABLE followers (
 - Self-follow prevention
 
 ### Database-Level Constraints
+
 - Unique constraints on email/username
 - NOT NULL constraints on required fields
 - Check constraint preventing self-follows
@@ -226,11 +246,13 @@ CREATE TABLE followers (
 ## Scalability Considerations
 
 ### Current Design Strengths
+
 - Normalized structure reduces redundancy
 - Efficient composite keys for relationships
 - Proper indexing strategy (see indexing-strategy.md)
 
 ### Future Scalability Options
+
 - **Horizontal Partitioning**: Partition posts by date/user
 - **Read Replicas**: For heavy read workloads
 - **Caching Layer**: Redis for hot data (vote counts, follower counts)
@@ -252,11 +274,13 @@ The schema is managed using Alembic migrations:
 ## Performance Characteristics
 
 ### Query Patterns
+
 - **High Read**: Post feeds, user profiles, vote counts
 - **Medium Write**: New posts, votes, follows
 - **Low Write**: User registration, profile updates
 
 ### Optimization Strategy
+
 - Denormalization avoided in favor of efficient joins
 - Aggregation queries use subqueries for accuracy
 - Indexes optimize common access patterns
@@ -264,17 +288,20 @@ The schema is managed using Alembic migrations:
 ## Security Considerations
 
 ### Sensitive Data
+
 - Passwords: Bcrypt hashed, never stored plain text
 - Email: Required for account recovery
 - Phone: Optional, for future 2FA implementation
 
 ### Access Patterns
+
 - Users can only modify their own content
 - Public read access to published posts
 - Private access to vote history
 - Follow relationships are public
 
 ### Privacy Controls
+
 - Published flag controls post visibility
 - User profile data has configurable privacy (future)
 - Vote history is private to the user
@@ -282,6 +309,7 @@ The schema is managed using Alembic migrations:
 ## Future Enhancements
 
 ### Planned Features
+
 - **User Profiles**: Bio, avatar, location fields
 - **Post Media**: Image/video attachments
 - **Comments**: Nested comment system
@@ -290,13 +318,14 @@ The schema is managed using Alembic migrations:
 - **Content Moderation**: Reporting system
 
 ### Schema Changes Required
+
 ```sql
 -- Future user profile enhancements
 ALTER TABLE users ADD COLUMN bio TEXT;
 ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);
 ALTER TABLE users ADD COLUMN location VARCHAR(100);
 
--- Future post media support  
+-- Future post media support
 CREATE TABLE post_media (
     id SERIAL PRIMARY KEY,
     post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
