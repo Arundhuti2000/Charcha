@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
-from sqlalchemy import func, case
+from sqlalchemy import desc, func, case
 from .base_repository import BaseRepository
 from ..interfaces.interfaces import IPostRepository
 from ...models import Post, Votes, User
@@ -15,8 +15,8 @@ class PostRepository(BaseRepository[Post], IPostRepository):
                 func.count(Votes.post_id).label("Votes"),
                 func.count(case((Votes.dir == 1, 1))).label("Upvotes"),
                 func.count(case((Votes.dir == -1, 1))).label("Downvotes"),
-                case((func.max(case((Votes.user_id == current_user_id, Votes.dir))).in_([1, -1]), True), else_=False).label("has_liked")
-            ).join(Votes, Votes.post_id == Post.id, isouter=True).group_by(Post.id).filter(Post.title.contains(search)).limit(limit).offset(skip).all()
+                case((func.max(case((Votes.user_id == current_user_id, Votes.dir))).in_([1, -1]), True), else_=False).label("has_liked")                                                                                                                                                                                                                                                                                                                                                    
+            ).join(Votes, Votes.post_id == Post.id, isouter=True).group_by(Post.id).order_by(desc(Post.created_at)).filter(Post.title.contains(search)).limit(limit).offset(skip).all()
         return post
     def get_user_posts_with_votes(self, user_id, skip = 0, limit = 10): #get_own_posts
         post=self.db.query(

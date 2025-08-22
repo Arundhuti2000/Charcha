@@ -169,3 +169,25 @@ class IFollowerRepository(ABC):
     # def get_follow_suggestions(self, user_id: int, limit: int = 10) -> List[User]:
     #     """Get suggested users to follow"""
     #     pass
+
+class IFeedRepository(ABC):
+    @abstractmethod
+    def get_following_feed(self, user_id: int, skip: int = 0, limit: int = 20) -> List[Tuple]:
+        """Get posts from users that the current user follows"""
+        pass
+    
+    @abstractmethod
+    def get_trending_feed(self, user_id: int, timeframe: str = "24h", skip: int = 0, limit: int = 20) -> List[Tuple]:
+        """Get trending posts based on vote velocity and engagement"""
+        pass
+
+    @abstractmethod
+    def get_recommended_feed(self, user_id: int, skip: int = 0, limit: int = 20) -> List[Tuple]:
+        """Get recommended posts based on user behavior and preferences"""
+        pass
+    
+    @abstractmethod
+    def get_feed_by_type(self, user_id: int, feed_type: str, timeframe: str = "24h", 
+                        skip: int = 0, limit: int = 20, search: str = "") -> List[Tuple]:
+        """Get feed based on specified type"""
+        pass

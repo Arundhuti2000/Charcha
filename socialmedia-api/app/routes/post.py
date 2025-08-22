@@ -5,7 +5,8 @@ from ..database import get_db
 from sqlalchemy import func, case
 from typing import List, Optional
 from ..repositories.database.post_repository import PostRepository
-from ..dependencies import get_post_repository
+from ..repositories.database.feed_repository import FeedRepository
+from ..dependencies import get_post_repository, get_feed_repository
 
 router = APIRouter(
     prefix="/posts",
@@ -13,8 +14,11 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.PostwithVote])
-def get_all_posts(post_repo: PostRepository = Depends(get_post_repository),get_current_user:int = Depends(oauth2.get_current_user), limit: int = 10, skip: int=0, search: Optional[str]= ""):
-    posts= post_repo.get_posts_with_votes(get_current_user.id,skip, limit, search)
+def get_all_posts(post_repo: PostRepository = Depends(get_post_repository),feed_repo: FeedRepository = Depends(get_feed_repository),get_current_user:int = Depends(oauth2.get_current_user), limit: int = 10, skip: int=0, search: Optional[str]= "", feed_type: str = "recommended"):
+    if search:
+        posts= post_repo.get_posts_with_votes(get_current_user.id,skip, limit, search)
+    else:
+        posts = feed_repo.get_feed_by_type(get_current_user.id, feed_type, skip=skip, limit=limit)
     # print("route")
     # print(posts)
     return posts
