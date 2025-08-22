@@ -31,3 +31,6 @@ htmlcov/
 .coverage
 app/__pycache__/
 app/routes/__pycache__/
+
+charcha-ui/*
+.kiro/*
