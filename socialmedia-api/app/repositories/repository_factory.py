@@ -4,6 +4,7 @@ from .database.user_repository import UserRepository
 from .database.vote_repository import VoteRepository
 from .database.follower_repository import FollowerRepository
 from .database.feed_repository import FeedRepository
+from .database.post_image_repository import PostImageRepository
 
 class RepositoryFactory:
     @staticmethod
@@ -26,3 +27,7 @@ class RepositoryFactory:
     def create_feed_repository(db: Session) -> FeedRepository:
         post_repo = PostRepository(db)
         return FeedRepository(db, post_repo)
+    
+    @staticmethod
+    def create_post_image_repository(db: Session) -> PostImageRepository:
+        return PostImageRepository(db)

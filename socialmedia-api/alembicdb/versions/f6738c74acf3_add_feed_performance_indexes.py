@@ -20,20 +20,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    # Index for post category (used in recommendations)
     op.create_index('idx_posts_category', 'posts', ['category'])
     
-    # Index for post created_at (used in chronological feeds)
     op.create_index('idx_posts_created_at', 'posts', ['created_at'])
     
-    # Index for post published status
     op.create_index('idx_posts_published', 'posts', ['published'])
-    
-    # Composite index for post user_id and created_at (user's posts chronologically)
+
     op.create_index('idx_posts_user_created', 'posts', ['user_id', 'created_at'])
-    
-    # Composite index for votes (post_id, user_id) - already exists as primary key
-    # Composite index for vote direction and post_id (for trending calculations)
+
     op.create_index('idx_votes_post_dir', 'votes', ['post_id', 'dir'])
 
 

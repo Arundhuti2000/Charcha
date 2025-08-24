@@ -7,6 +7,7 @@ from .repositories.database.user_repository import UserRepository
 from .repositories.database.vote_repository import VoteRepository
 from .repositories.database.follower_repository import FollowerRepository
 from .repositories.database.feed_repository import FeedRepository
+from .repositories.database.post_image_repository import PostImageRepository
 
 # Repository Dependencies
 def get_post_repository(db: Session = Depends(get_db)) -> PostRepository:
@@ -23,3 +24,6 @@ def get_follower_repository(db: Session = Depends(get_db)) -> FollowerRepository
 
 def get_feed_repository(db: Session = Depends(get_db)) -> FeedRepository:
     return RepositoryFactory.create_feed_repository(db)
+
+def get_post_image_repository(db: Session = Depends(get_db)) -> PostImageRepository:
+    return RepositoryFactory.create_post_image_repository(db)

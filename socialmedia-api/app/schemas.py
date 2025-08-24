@@ -4,6 +4,26 @@ from typing import List, Optional, Annotated
 from pydantic import BaseModel, EmailStr, Field, validator
 from datetime import datetime
 
+
+class PostImageResponse(BaseModel):
+    id: int
+    blob_name: str
+    blob_url: str
+    original_filename: str
+    file_size: Optional[int] = None
+    content_type: str
+    display_order: int
+    is_primary: bool
+    created_at: datetime
+    
+    class Config:
+        orm_mode = True
+
+class ImageUploadResponse(BaseModel):
+    success: bool
+    message: str
+    images: List[PostImageResponse]
+
 class PostBase(BaseModel):
     title: str
     content: str
@@ -48,6 +68,22 @@ class PostwithVote(BaseModel):
     has_liked: bool = False
     class Config:
         orm_mode = True
+
+class PostImageUpdate(BaseModel):
+    display_order: Optional[int] = None
+    is_primary: Optional[bool] = None
+
+class BulkImageUpdate(BaseModel):
+    image_updates: List[dict]  # List of {id: int, display_order: int, is_primary: bool}
+
+
+class MediaUploadRequest(BaseModel):
+    max_images: int = Field(default=5, le=10)
+    resize_images: bool = True
+    generate_thumbnails: bool = False
+
+class MediaDeleteRequest(BaseModel):
+    image_ids: List[int]
 
 class UserBase(BaseModel):
     email: EmailStr

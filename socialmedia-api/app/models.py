@@ -14,6 +14,23 @@ class Post(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable= False)
     owner = relationship("User") 
 
+class PostImage(Base):
+    __tablename__ = 'post_images'
+    
+    id = Column(Integer, primary_key=True, nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+    blob_name = Column(String(500), nullable=False, unique=True)
+    blob_url = Column(String(1000), nullable=False)
+    original_filename = Column(String(255), nullable=False)
+    file_size = Column(Integer, nullable=True)
+    content_type = Column(String(100), nullable=False)
+    display_order = Column(Integer, nullable=False, server_default='0')
+    is_primary = Column(Boolean, nullable=False, server_default='False')
+    created_at = Column(TIMESTAMP(timezone=True), server_default='now()', nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default='now()', nullable=False)
+    
+    post = relationship("Post", back_populates="images")
+
 class User(Base):
     __tablename__ = 'users'
 
