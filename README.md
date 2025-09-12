@@ -1,4 +1,4 @@
-# Social Media Platform
+# Charcha Social Media 
 
 A full-stack social media application with real-time voting, user authentication, and scalable cloud deployment.
 
