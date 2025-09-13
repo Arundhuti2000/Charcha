@@ -13,7 +13,6 @@ Social platform where users can create accounts, share posts, and engage through
 Still in Progress, many features yet to come.
 
 ## Features
-
 **User Management**
 - JWT-based authentication with secure token handling
 - User registration and profile management
@@ -32,7 +31,6 @@ Still in Progress, many features yet to come.
 - Comprehensive API documentation
 
 ---
-
 ## Architecture
 
 **Backend (FastAPI)**
