@@ -1,0 +1,236 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "containerapps_ca_social_media_name": {
+            "defaultValue": "ca-social-media",
+            "type": "String"
+        },
+        "managedEnvironments_managedEnvironment_rgsocialmedia_a2e6_name": {
+            "defaultValue": "managedEnvironment-rgsocialmedia-a2e6",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.App/managedEnvironments",
+            "apiVersion": "2025-02-02-preview",
+            "name": "[parameters('managedEnvironments_managedEnvironment_rgsocialmedia_a2e6_name')]",
+            "location": "East US",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "appLogsConfiguration": {
+                    "destination": "log-analytics",
+                    "logAnalyticsConfiguration": {
+                        "customerId": "33a13890-ad78-43b8-8af2-5e41eb974d8f",
+                        "dynamicJsonColumns": false
+                    }
+                },
+                "zoneRedundant": false,
+                "kedaConfiguration": {},
+                "daprConfiguration": {},
+                "customDomainConfiguration": {},
+                "workloadProfiles": [
+                    {
+                        "workloadProfileType": "Consumption",
+                        "name": "Consumption",
+                        "enableFips": false
+                    }
+                ],
+                "peerAuthentication": {
+                    "mtls": {
+                        "enabled": false
+                    }
+                },
+                "peerTrafficConfiguration": {
+                    "encryption": {
+                        "enabled": false
+                    }
+                },
+                "publicNetworkAccess": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.App/containerapps",
+            "apiVersion": "2025-02-02-preview",
+            "name": "[parameters('containerapps_ca_social_media_name')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.App/managedEnvironments', parameters('managedEnvironments_managedEnvironment_rgsocialmedia_a2e6_name'))]"
+            ],
+            "kind": "containerapps",
+            "identity": {
+                "type": "None"
+            },
+            "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('managedEnvironments_managedEnvironment_rgsocialmedia_a2e6_name'))]",
+                "environmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('managedEnvironments_managedEnvironment_rgsocialmedia_a2e6_name'))]",
+                "workloadProfileName": "Consumption",
+                "configuration": {
+                    "secrets": [
+                        {
+                            "name": "database-password"
+                        },
+                        {
+                            "name": "jwt-secret-key"
+                        },
+                        {
+                            "name": "reg-pswd-eb6e415e-94da"
+                        }
+                    ],
+                    "activeRevisionsMode": "Single",
+                    "ingress": {
+                        "external": true,
+                        "targetPort": 8000,
+                        "exposedPort": 0,
+                        "transport": "Auto",
+                        "traffic": [
+                            {
+                                "revisionName": "[concat(parameters('containerapps_ca_social_media_name'), '--0000015')]",
+                                "weight": 100
+                            }
+                        ],
+                        "allowInsecure": false,
+                        "clientCertificateMode": "Ignore",
+                        "stickySessions": {
+                            "affinity": "none"
+                        }
+                    },
+                    "registries": [
+                        {
+                            "server": "acrsocialmedia01.azurecr.io",
+                            "identity": "system-environment"
+                        },
+                        {
+                            "server": "docker.io",
+                            "username": "arundhutidas2000",
+                            "passwordSecretRef": "reg-pswd-eb6e415e-94da"
+                        }
+                    ],
+                    "identitySettings": [],
+                    "maxInactiveRevisions": 100
+                },
+                "template": {
+                    "containers": [
+                        {
+                            "image": "docker.io/arundhutidas2000/socialmedia-api:latest",
+                            "imageType": "ContainerImage",
+                            "name": "social-media-container",
+                            "env": [
+                                {
+                                    "name": "DATABASE_HOSTNAME",
+                                    "value": "postgre-socialmedia-server.postgres.database.azure.com"
+                                },
+                                {
+                                    "name": "DATABASE_PORT",
+                                    "value": "5432"
+                                },
+                                {
+                                    "name": "DATABASE_USERNAME",
+                                    "value": "postgres"
+                                },
+                                {
+                                    "name": "DATABASE_NAME",
+                                    "value": "fastapi"
+                                },
+                                {
+                                    "name": "ALGORITHM",
+                                    "value": "HS256"
+                                },
+                                {
+                                    "name": "ACCESS_TOKEN_EXPIRE_MINUTES",
+                                    "value": "30"
+                                },
+                                {
+                                    "name": "DATABASE_PASSWORD",
+                                    "secretRef": "database-password"
+                                },
+                                {
+                                    "name": "SECRET_KEY",
+                                    "secretRef": "jwt-secret-key"
+                                }
+                            ],
+                            "resources": {
+                                "cpu": 0.25,
+                                "memory": "0.5Gi"
+                            },
+                            "probes": []
+                        }
+                    ],
+                    "initContainers": [
+                        {
+                            "image": "acrsocialmedia01.azurecr.io/socialmedia-api:latest",
+                            "imageType": "ContainerImage",
+                            "name": "init-alembic-migrations",
+                            "command": [
+                                "sh"
+                            ],
+                            "args": [
+                                "-c",
+                                "alembic upgrade head"
+                            ],
+                            "env": [
+                                {
+                                    "name": "DATABASE_HOSTNAME",
+                                    "value": "postgre-socialmedia-server.postgres.database.azure.com"
+                                },
+                                {
+                                    "name": "DATABASE_PORT",
+                                    "value": "5432"
+                                },
+                                {
+                                    "name": "DATABASE_USERNAME",
+                                    "value": "postgres"
+                                },
+                                {
+                                    "name": "DATABASE_NAME",
+                                    "value": "fastapi"
+                                },
+                                {
+                                    "name": "ALGORITHM",
+                                    "value": "HS256"
+                                },
+                                {
+                                    "name": "ACCESS_TOKEN_EXPIRE_MINUTES",
+                                    "value": "30"
+                                },
+                                {
+                                    "name": "DATABASE_PASSWORD",
+                                    "secretRef": "database-password"
+                                },
+                                {
+                                    "name": "SECRET_KEY",
+                                    "secretRef": "jwt-secret-key"
+                                }
+                            ],
+                            "resources": {
+                                "cpu": 0.25,
+                                "memory": "0.5Gi"
+                            }
+                        }
+                    ],
+                    "scale": {
+                        "minReplicas": 0,
+                        "maxReplicas": 5,
+                        "cooldownPeriod": 300,
+                        "pollingInterval": 30,
+                        "rules": [
+                            {
+                                "name": "http-scaler",
+                                "http": {
+                                    "metadata": {
+                                        "concurrentRequests": "10"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "volumes": []
+                }
+            }
+        }
+    ]
+}
