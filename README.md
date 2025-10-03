@@ -1,4 +1,4 @@
-# Social Media Platform
+# Charcha Social Media 
 
 A full-stack social media application with real-time voting, user authentication, and scalable cloud deployment.
 
@@ -11,9 +11,7 @@ A full-stack social media application with real-time voting, user authentication
 
 Social platform where users can create accounts, share posts, and engage through a voting system. Built with FastAPI backend and React TypeScript frontend, deployed on Azure Container Apps with PostgreSQL database.
 Still in Progress, many features yet to come.
-
 ## Features
-
 **User Management**
 - JWT-based authentication with secure token handling
 - User registration and profile management
@@ -32,7 +30,6 @@ Still in Progress, many features yet to come.
 - Comprehensive API documentation
 
 ---
-
 ## Architecture
 
 **Backend (FastAPI)**
