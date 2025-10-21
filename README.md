@@ -1,4 +1,4 @@
-# Charcha Social Media 
+# Charcha Social Media (Chai pe charcha)
 
 A full-stack social media application with real-time voting, user authentication, and scalable cloud deployment.
 
